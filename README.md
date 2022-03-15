@@ -47,9 +47,11 @@ TO DO: DON'T DO NOW... Write this in LIDE-004
 ## POCs
 
 Program Manager:
+
 	Scott Krueger
 	skrueger@us.globalinfotek.com
 
 Project Lead:
+
 	Joseph "Hark" Harkleroad
 	jharkleroad@us.globalinfotek.com
