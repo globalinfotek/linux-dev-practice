@@ -10,3 +10,4 @@
   tasks:
     - include: tasks/linux/install-packages.yml
     - include: tasks/linux/install-hobo.yml
+    - include: tasks/linux/install-vscode.yml

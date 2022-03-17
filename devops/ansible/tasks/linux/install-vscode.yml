@@ -1,0 +1,22 @@
+- name: Add Microsoft GPG key
+  apt_key:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+- name: Install SPC
+  apt:
+    state: present
+    name: software-properties-common
+    update_cache: yes
+  ignore_errors: yes
+  
+- name: Add VS Code Repository
+  apt_repository:
+    repo: deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
+    state: present
+
+- name: Install VS Code
+  apt:
+    state: present
+    name: code
+    update_cache: yes
