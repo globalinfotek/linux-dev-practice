@@ -12,3 +12,7 @@ sudo apt install python3-pip -y
 # Ansible
 sudo apt-get install ansible -y
 sudo python3.8 -m pip install ansible
+
+pushd linux-dev-practice/devops/ansible
+ansible-playbook provision-cde.yml
+popd
