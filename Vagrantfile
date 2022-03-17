@@ -13,6 +13,7 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = "LDP-CDE-v0.0.1"
   config.vm.box = "ubuntu/focal64"
   config.vm.box_version = "20200430.1.0"
+  config.vm.synced_folder ".", "/home/vagrant/linux-dev-practice"
   config.vm.provider "virtualbox" do |vb|
     # Display the VirtualBox GUI when booting the machine
     vb.gui = true
