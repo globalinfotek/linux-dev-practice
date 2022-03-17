@@ -12,3 +12,4 @@
     - include: tasks/linux/install-hobo.yml
     - include: tasks/linux/install-vscode.yml
     - include: tasks/linux/install-sublime.yml
+    - include: tasks/linux/auto-logon.yml

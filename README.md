@@ -15,7 +15,7 @@ This repo contains a set of practice exercises dedicated to Linux system program
 - `cd linux-dev-practice`
 - `vagrant up`  (and be patient)
 - `vagrant reload`  (allows the desktop environment to start)
-- Log in with password `vagrant`
+- Log in with password `vagrant` (if necessary)
 
 **NOTE:** You may need to increase the default Virtualbox settings for this machine (see: Machine --> Settings)
 - Shared Clipboard: General --> Advanced

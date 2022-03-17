@@ -1,0 +1,10 @@
+- name: Configure autologin
+  ansible.builtin.replace:
+   path: /etc/gdm3/custom.conf
+   regexp: "{{ item.regex }}"
+   replace: "{{ item.replace }}"
+   backup: yes
+  with_items:
+   - { regex: '^(#\s+)(AutomaticLogin =\s+)user1(\s*$)', replace: '\2vagrant\3'}
+   - { regex: '^(#\s+)(Automatic\w+\s+=\s*\w+\s*$)', replace: '\2'}
+  become: yes
