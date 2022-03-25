@@ -8,3 +8,7 @@
 - name: Set Window Colors
   become_user: vagrant
   dconf: key="/org/gnome/desktop/interface/gtk-theme" value="'Yaru-dark'"
+
+- name: Add applications to favorites
+  become_user: vagrant
+  dconf: key="/org/gnome/shell/favorite-apps" value="['org.gnome.Nautilus.desktop', 'sublime_text.desktop', 'code.desktop', 'org.gnome.Terminal.desktop']"
