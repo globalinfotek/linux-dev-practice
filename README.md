@@ -22,6 +22,9 @@ This repo contains a set of practice exercises dedicated to Linux system program
 - Base Memory: System --> Motherboard
 - Number of Processors: System --> Processor (min: 2)
 
+**NOTE2:**
+If running vagrant inside of a VM(i.e Windows host >  Linux running vagrant) ensure you change the processor settings for that vm to enable the setting `Virtualize Intel VT-x/EPT or AMD-V/RVI`. 
+
 ### Start of Day
 
 `vagrant up`
