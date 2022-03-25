@@ -8,12 +8,12 @@ Vagrant.configure("2") do |config|
 # https://docs.vagrantup.com
   config.ssh.username = "vagrant"
   config.ssh.insert_key = false
-  config.vbguest.auto_update = true
   # config.vm.define "development" do |dev|
   config.vm.hostname = "LDP-CDE-v0.0.1"
   config.vm.box = "ubuntu/focal64"
   config.vm.box_version = "20200430.1.0"
   config.vm.synced_folder ".", "/home/vagrant/linux-dev-practice"
+  config.vm.box_check_update = true
   config.vm.provider "virtualbox" do |vb|
     # Display the VirtualBox GUI when booting the machine
     vb.gui = true
