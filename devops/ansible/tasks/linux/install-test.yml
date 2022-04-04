@@ -1,0 +1,7 @@
+# TEDIOUS START (TEST) is a collection of common-use test functionality based on Python3's
+# unittest module.  Future TEST version releases merely require a modification to the filename
+# below.  pip3 will take care of the rest.
+- name: Install Tedious Start (TEST)
+  pip:
+    executable: pip3
+    name: /home/vagrant/linux-dev-practice/lib/tedious-start/test-1.0.0-py3-none-any.whl
