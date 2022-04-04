@@ -1,0 +1,16 @@
+---
+# Provision the Common Development Environment (CDE)
+
+- hosts: 127.0.0.1
+  connection: local
+  become: yes
+  vars:
+    HOME_DIR: "/home/{{ansible_env.SUDO_USER}}"
+
+  tasks:
+    - include: tasks/linux/install-packages.yml
+    - include: tasks/linux/install-hobo.yml
+    - include: tasks/linux/install-vscode.yml
+    - include: tasks/linux/install-sublime.yml
+    - include: tasks/linux/auto-logon.yml
+    - include: tasks/linux/tweak-gnome.yml

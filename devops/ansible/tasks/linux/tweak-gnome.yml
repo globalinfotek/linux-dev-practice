@@ -1,0 +1,14 @@
+- name: Install Yaru GTK Theme
+  apt:
+    name: yaru-theme-gtk
+
+- name: Install python3-psutil package
+  apt: name=python3-psutil
+
+- name: Set Window Colors
+  become_user: vagrant
+  dconf: key="/org/gnome/desktop/interface/gtk-theme" value="'Yaru-dark'"
+
+- name: Add applications to favorites
+  become_user: vagrant
+  dconf: key="/org/gnome/shell/favorite-apps" value="['org.gnome.Nautilus.desktop', 'sublime_text.desktop', 'code.desktop', 'org.gnome.Terminal.desktop']"

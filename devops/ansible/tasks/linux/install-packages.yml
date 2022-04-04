@@ -1,0 +1,9 @@
+- name: Install Python Pip Packages
+  pip:
+    name: "{{ item }}"
+    state: latest
+    executable: pip3
+  loop:
+    - "pylint"
+    - "pycodestyle"
+    - "lizard"
