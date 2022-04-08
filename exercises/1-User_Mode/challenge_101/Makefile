@@ -12,8 +12,8 @@ OBJ = 101_source.o
 %.o: %.c $(DEPS)
 	$(CC) -c -o $(DIST)$@ $< $(CFLAGS)
 
-101_challenge.bin: $(DIST)$(OBJ)
-	$(CC) -o $(DIST)$@ $^ $(CFLAGS)
+101_challenge.bin: $(OBJ)
+	$(CC) -o $(DIST)$@ $(DIST)$^ $(CFLAGS)
 
 clean:
 	rm -f $(DIST)*.o $(DIST)*.exe $(DIST)*.bin $(DIST)*.lib $(DIST)*.so $(DIST)*.egg
