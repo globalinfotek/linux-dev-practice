@@ -24,7 +24,7 @@
 void initSigHandlers(void);
 
 
-void main(void)
+int main(void)
 {
     // Prepare stdout
     setvbuf(stdout, NULL, _IONBF, 0);  // Make stdout unbuffered
@@ -40,6 +40,7 @@ void main(void)
         printf(".");
     }
     printf("Done\n");
+    return 0;
 }
 
 
