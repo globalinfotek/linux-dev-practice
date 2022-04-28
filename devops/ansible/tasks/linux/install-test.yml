@@ -4,4 +4,4 @@
 - name: Install Tedious Start (TEST)
   pip:
     executable: pip3
-    name: /home/vagrant/linux-dev-practice/lib/tedious-start/test-1.0.0-py3-none-any.whl
+    name: /home/vagrant/linux-dev-practice/lib/tedious-start/test-1.1.0-py3-none-any.whl
