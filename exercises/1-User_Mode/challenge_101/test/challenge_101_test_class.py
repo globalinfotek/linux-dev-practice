@@ -123,7 +123,6 @@ class Challenge101Test(TediousFuncTest):
 
         # TEST
         # Default
-        # print(f'BIN RESULTS: {bin_results}')  # DEBUGGING
         self._raw_stdout = bin_results.std_out
         self._raw_stderr = bin_results.std_err
         self._validate_default_results(bin_results.std_out, bin_results.std_err,
@@ -144,7 +143,6 @@ class Challenge101Test(TediousFuncTest):
 
         # SEND SIGNALS
         for exp_result in self._signal_results:
-            # print('ENTERING LOOP')  # DEBUGGING
             exit_code = binary.poll()
             if exit_code:
                 self._add_test_failure(f'{binary.args[0]} is not running: {exit_code}')
@@ -156,11 +154,8 @@ class Challenge101Test(TediousFuncTest):
                     try:
                         exit_code = binary.wait(WAIT_TIME)
                     except TimeoutExpired:
-                        # print(f'TIMEDOUT FOR {exp_result.signal_num}')  # DEBUGGING
                         # Don't wait for 19 because it doesn't get any more CPU cycles
                         if exp_result.signal_num == 9:
-                        # if exp_result.signal_num in [9, 19]:
-                            # print(f'WAITING FOR: {exp_result.signal_num}')  # DEBUGGING
                             continue
                         else:
                             break
