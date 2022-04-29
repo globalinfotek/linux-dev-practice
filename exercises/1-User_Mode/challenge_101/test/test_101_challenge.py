@@ -5,13 +5,18 @@ from test.challenge_101_test_class import Challenge101Test, SignalResults
 class Challenge101Normal(Challenge101Test):
 
     def test_normal_01(self):
-        """Start then SIGQUIT."""
+        """Start, SIGQUIT, then SIGKILL.
+
+        Test class will implicitly add a SIGKILL.
+        """
         self.check_signals([SignalResults(3, False)])
         self.expect_stderr(['Ignoring signal: 3'])
         self.run_test()
 
     def test_normal_02(self):
-        """Start, SIGINT, then SIGKILL."""
+        """Start, SIGINT, then SIGKILL.
+
+        Explicitly added SIGKILL."""
         self.check_signals([SignalResults(2, False), SignalResults(9, True)])
         self.expect_stderr(['Ignoring signal: 2'])
         self.run_test()
@@ -44,6 +49,18 @@ class Challenge101Boundary(Challenge101Test):
         # RUN IT
         self.check_signals(sig_res_list)
         self.expect_stderr(exp_err_list)
+        self.run_test()
+
+    def test_boundary_03(self):
+        """Smallest valid signal: SIGHUP."""
+        self.check_signals([SignalResults(1, False)])
+        self.expect_stderr(['Ignoring signal: 1'])
+        self.run_test()
+
+    def test_boundary_04(self):
+        """Largest valid signal: SIGRTMAX."""
+        self.check_signals([SignalResults(64, False)])
+        self.expect_stderr(['Ignoring signal: 64'])
         self.run_test()
 
 
