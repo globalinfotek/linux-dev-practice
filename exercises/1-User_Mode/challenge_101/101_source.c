@@ -28,6 +28,7 @@ int main(void)
 {
     // Prepare stdout
     setvbuf(stdout, NULL, _IONBF, 0);  // Make stdout unbuffered
+    setvbuf(stderr, NULL, _IONBF, 0);  // Make stderr unbuffered
 
     // Initialize Signal Handlers
     initSigHandlers();
