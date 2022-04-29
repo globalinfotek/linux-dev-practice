@@ -6,7 +6,7 @@ import os
 # Third Party Imports
 from hobo.disk_operations import find_path_to_dir
 from hobo.makefile_automation import execute_makefile_rule
-from hobo.subprocess_wrapper import start_subprocess_cmd
+from hobo.subprocess_wrapper import execute_subprocess_cmd, start_subprocess_cmd
 from hobo.validation import validate_type
 from tediousstart.tediousstart import execute_test_cases
 from tediousstart.tediousfunctest import TediousFuncTest
@@ -62,6 +62,30 @@ class Challenge101Test(TediousFuncTest):
         self.set_command_list([self._full_challenge_bin])
         self._challenge_path = find_path_to_dir('challenge_101')
         super(Challenge101Test, self).setUp()
+
+    def tearDown(self) -> None:
+        """Close out the test case environment.
+
+        Verifies there isn't an errant binary in execution.  Warns the user if it finds one.
+        """
+        # LOCAL VARIABLES
+        std_out = ''                               # stdout
+        cmd_list = ['pidof', self._challenge_bin]  # Command to execute
+        command = ' '.join(cmd_list)               # Human readable command
+
+        # TEAR DOWN
+        super(Challenge101Test, self).tearDown()
+        # Look for errant binaries
+        try:
+            (std_out, _) = execute_subprocess_cmd(cmd_list)
+        except RuntimeError as err:
+                self.fail(self._test_error.format(f'Failed to execute comamnd: {command} with '
+                                                  f'{str(err)}'))
+        else:
+            if std_out:
+                self.fail(self._test_error.format(f'{self._challenge_bin} appears to still be '
+                                                  f'running on PID {std_out}.  You may need to '
+                                                  '`kill -SIGKILL {std_out}`'))
 
     # TEST AUTHOR METHODS
     # Methods listed in "suggested" call order
