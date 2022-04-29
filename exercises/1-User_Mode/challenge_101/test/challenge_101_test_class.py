@@ -1,5 +1,6 @@
 # Standard Imports
-from subprocess import Popen
+from subprocess import Popen, TimeoutExpired
+from time import sleep
 from typing import Any, NamedTuple
 import os
 # Third Party Imports
@@ -38,6 +39,8 @@ class Challenge101Test(TediousFuncTest):
         self._challenge_bin = '101_challenge.bin'  # Name of the binary to test
         self._challenge_path = None                # Absolute path to the challenge directory
         self._signal_results = []                  # List of test author's expected signal results
+        # Full path/filename to the binary to test
+        self._full_challenge_bin = os.path.join('.', 'dist', self._challenge_bin)
         super().__init__(*args, **kwargs)
 
     def validate_results(self) -> Any:
@@ -56,14 +59,18 @@ class Challenge101Test(TediousFuncTest):
 
         Automate any preparation necessary before each Test Case executes.
         """
-        self.set_command_list([os.path.join('.', 'dist', self._challenge_bin)])
+        self.set_command_list([self._full_challenge_bin])
         self._challenge_path = find_path_to_dir('challenge_101')
         super(Challenge101Test, self).setUp()
 
     # TEST AUTHOR METHODS
     # Methods listed in "suggested" call order
     def check_signals(self, signals: list) -> None:
-        """Start the binary and send a signal."""
+        """Start the binary and send one or more signals.
+
+        Signals are sent to the binary, during execution, in the order provided.  An explicit
+        SIGKILL is appended to the list to ensure the binary is killed.
+        """
         # INPUT VALIDATION
         self._validate_list(signals, 'signals', can_be_empty=False)
         for signal_entry in signals:
@@ -75,9 +82,21 @@ class Challenge101Test(TediousFuncTest):
 
         # SAVE
         self._signal_results = signals
+        self._signal_results.append(SignalResults(9, True))
 
     # CLASS HELPER METHODS
     # Methods listed in alphabetical order
+    def _build_challenge_bin(self) -> None:
+        """Execute the makefile rule to build the binary."""
+        # LOCAL VARIABLES
+        makefile = os.path.join(self._challenge_path, 'Makefile')  # Makefile filename
+
+        # BUILD
+        # Clean
+        execute_makefile_rule(makefile, 'clean')
+        # Make
+        execute_makefile_rule(makefile, self._challenge_bin)
+
     def _run_test(self) -> None:
         """Override parent's method to execute the test case and test results.
 
@@ -93,16 +112,20 @@ class Challenge101Test(TediousFuncTest):
 
         # EXECUTE
         # Build
-        execute_makefile_rule(os.path.join(self._challenge_path, 'Makefile'), self._challenge_bin)
+        self._build_challenge_bin()
 
         # Start
         popen_obj = start_subprocess_cmd(self._cmd_list)
+        sleep(WAIT_TIME)  # Give the binary a second to start
 
         # Signal
         bin_results = self._send_signals(popen_obj)
 
         # TEST
         # Default
+        print(f'BIN RESULTS: {bin_results}')  # DEBUGGING
+        self._raw_stdout = bin_results.std_out
+        self._raw_stderr = bin_results.std_err
         self._validate_default_results(bin_results.std_out, bin_results.std_err,
                                        bin_results.exit_code)
 
@@ -121,6 +144,7 @@ class Challenge101Test(TediousFuncTest):
 
         # SEND SIGNALS
         for exp_result in self._signal_results:
+            print('ENTERING LOOP')  # DEBUGGING
             exit_code = binary.poll()
             if exit_code:
                 self._add_test_failure(f'{binary.args[0]} is not running: {exit_code}')
@@ -132,28 +156,37 @@ class Challenge101Test(TediousFuncTest):
                     try:
                         exit_code = binary.wait(WAIT_TIME)
                     except TimeoutExpired:
-                        if exp_result.signal_num in [9, 19]:
+                        print(f'TIMEDOUT FOR {exp_result.signal_num}')  # DEBUGGING
+                        # Don't wait for 19 because it doesn't get any more CPU cycles
+                        if exp_result.signal_num == 9:
+                        # if exp_result.signal_num in [9, 19]:
+                            print(f'WAITING FOR: {exp_result.signal_num}')  # DEBUGGING
                             continue
                         else:
                             break
                     else:
                         break
 
-                print(f'binary.poll() returned {exit_code}')  # DEBUGGING
+                # DETERMINE SIGNAL RESULTS
+                # Test author expected an exit but it did not exit
                 if exp_result.bin_exit and not exit_code:
                     self._add_test_failure(f'{binary.args[0]} did not exit on '
                                            f'signal {exp_result.signal_num}')
                     break
+                # Test author did not expect an exit but it exited
                 if not exp_result.bin_exit and exit_code:
                     self._add_test_failure(f'{binary.args[0]} prematurely exited on '
                                            f'signal {exp_result.signal_num}')
                     break
+                # Test author expected an exit and it exited
+                if exp_result.bin_exit and exit_code:
+                    break
 
         # GET RESULTS
         # Get exit code
-        if not exit_code:
+        if binary.poll():
             # Kill the process
-            binary.send_signal(19)  # SIGSTOP
+            binary.send_signal(9)  # SIGKILL
             exit_code = binary.poll()
         # Get output
         (std_out, std_err) = binary.communicate()
