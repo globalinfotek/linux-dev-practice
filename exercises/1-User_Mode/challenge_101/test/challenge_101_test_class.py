@@ -1,3 +1,16 @@
+"""Defines test framework functionality for Challenge 101.
+
+Defines test and container classes for  User Mode challenge 101: Signal handlers.
+
+    Typical usage example:
+
+    from test.challenge_101_test_class import Challenge101Test
+
+    class MyTestCases(Challenge101Test):
+        def test_case_01(self):
+            self.pass('My first test case!')
+"""
+
 # Standard Imports
 from subprocess import Popen, TimeoutExpired
 from time import sleep
@@ -8,7 +21,6 @@ from hobo.disk_operations import find_path_to_dir
 from hobo.makefile_automation import execute_makefile_rule
 from hobo.subprocess_wrapper import execute_subprocess_cmd, start_subprocess_cmd
 from hobo.validation import validate_type
-from tediousstart.tediousstart import execute_test_cases
 from tediousstart.tediousfunctest import TediousFuncTest
 
 
@@ -34,6 +46,26 @@ class BinaryResults(NamedTuple):
 
 
 class Challenge101Test(TediousFuncTest):
+    """Functional test framework for Challenge 101.
+
+    By default, each test case should probably follow this call order:
+
+    # 1. Specify Signals
+    check_signals()  # Send one or more signals to the binary at "test time"
+
+    # 2. Specify Expected Output
+    # 2.1. stdout
+    expect_stdout()  # Search the binary's stdout for required messages
+    # -or-
+    verify_stdout_empty()  # Verify there was nothing sent to stdout at "test time"
+    # 2.2. stderr
+    expect_stderr()  # Search the binary's stderr for required messages
+    # -or-
+    verify_stderr_empty()  # Verify there was nothing sent to stderr at "test time"
+
+    # 3. Run it
+    run_test()  # Executes the test case as specified by the test author
+    """
 
     def __init__(self, *args, **kwargs) -> None:
         self._challenge_bin = '101_challenge.bin'  # Name of the binary to test
@@ -61,7 +93,7 @@ class Challenge101Test(TediousFuncTest):
         """
         self.set_command_list([self._full_challenge_bin])
         self._challenge_path = find_path_to_dir('challenge_101')
-        super(Challenge101Test, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         """Close out the test case environment.
@@ -74,13 +106,13 @@ class Challenge101Test(TediousFuncTest):
         command = ' '.join(cmd_list)               # Human readable command
 
         # TEAR DOWN
-        super(Challenge101Test, self).tearDown()
+        super().tearDown()
         # Look for errant binaries
         try:
             (std_out, _) = execute_subprocess_cmd(cmd_list)
         except RuntimeError as err:
-                self.fail(self._test_error.format(f'Failed to execute comamnd: {command} with '
-                                                  f'{str(err)}'))
+            self.fail(self._test_error.format(f'Failed to execute comamnd: {command} with '
+                                              f'{str(err)}'))
         else:
             if std_out:
                 self.fail(self._test_error.format(f'{self._challenge_bin} appears to still be '
@@ -149,8 +181,8 @@ class Challenge101Test(TediousFuncTest):
         # Default
         self._raw_stdout = bin_results.std_out
         self._raw_stderr = bin_results.std_err
-        self._validate_default_results(bin_results.std_out, bin_results.std_err,
-                                       bin_results.exit_code)
+        self._validate_default_output(bin_results.std_out, bin_results.std_err,
+                                      bin_results.exit_code)
 
         # Other results
         self.validate_results()
@@ -171,35 +203,33 @@ class Challenge101Test(TediousFuncTest):
             if exit_code:
                 self._add_test_failure(f'{binary.args[0]} is not running: {exit_code}')
                 break
-            else:
-                binary.send_signal(exp_result.signal_num)
+            binary.send_signal(exp_result.signal_num)
 
-                while True:
-                    try:
-                        exit_code = binary.wait(WAIT_TIME)
-                    except TimeoutExpired:
-                        # Don't wait for 19 because it doesn't get any more CPU cycles
-                        if exp_result.signal_num == 9:
-                            continue
-                        else:
-                            break
-                    else:
-                        break
+            while True:
+                try:
+                    exit_code = binary.wait(WAIT_TIME)
+                except TimeoutExpired:
+                    # Don't wait for 19 because it doesn't get any more CPU cycles
+                    if exp_result.signal_num == 9:
+                        continue
+                    break
+                else:
+                    break
 
-                # DETERMINE SIGNAL RESULTS
-                # Test author expected an exit but it did not exit
-                if exp_result.bin_exit and not exit_code:
-                    self._add_test_failure(f'{binary.args[0]} did not exit on '
-                                           f'signal {exp_result.signal_num}')
-                    break
-                # Test author did not expect an exit but it exited
-                if not exp_result.bin_exit and exit_code:
-                    self._add_test_failure(f'{binary.args[0]} prematurely exited on '
-                                           f'signal {exp_result.signal_num}')
-                    break
-                # Test author expected an exit and it exited
-                if exp_result.bin_exit and exit_code:
-                    break
+            # DETERMINE SIGNAL RESULTS
+            # Test author expected an exit but it did not exit
+            if exp_result.bin_exit and not exit_code:
+                self._add_test_failure(f'{binary.args[0]} did not exit on '
+                                       f'signal {exp_result.signal_num}')
+                break
+            # Test author did not expect an exit but it exited
+            if not exp_result.bin_exit and exit_code:
+                self._add_test_failure(f'{binary.args[0]} prematurely exited on '
+                                       f'signal {exp_result.signal_num}')
+                break
+            # Test author expected an exit and it exited
+            if exp_result.bin_exit and exit_code:
+                break
 
         # GET RESULTS
         # Get exit code
@@ -213,8 +243,7 @@ class Challenge101Test(TediousFuncTest):
         # DONE
         return BinaryResults(std_out, std_err, exit_code)
 
-
-    def _validate_default_results(self, std_out: str, std_err: str, exit_code: int) -> None:
+    def _validate_default_output(self, std_out: str, std_err: str, exit_code: int) -> None:
         """Validate output and exit code."""
         # TEST RESULTS
         # stdout

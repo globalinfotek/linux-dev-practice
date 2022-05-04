@@ -1,8 +1,26 @@
-from hobo.subprocess_wrapper import execute_subprocess_cmd
+"""Define test cases for Challenge 101.
+
+Define test cases for User Mode challenge 101: Signal handlers.
+
+    Typical usage example:
+
+    cd exercises/1-User_Mode/challenge_101
+    python3 -m unittest -v                 # Run all the test cases in verbose mode
+    # -or-
+    python3 -m unittest -v -k boundary_01  # The one test cases that should *always* pass
+    # -or-
+    python3 -m unittest -v -k normal_01    # If you can make this pass, you're doing well
+"""
+
+# Standard Imports
+# Third Party Imports
 from test.challenge_101_test_class import Challenge101Test, SignalResults
+from hobo.subprocess_wrapper import execute_subprocess_cmd
+# Local Imports
 
 
 class Challenge101Normal(Challenge101Test):
+    """Defines normal test cases."""
 
     def test_normal_01(self):
         """Start, SIGQUIT, then SIGKILL.
@@ -23,6 +41,7 @@ class Challenge101Normal(Challenge101Test):
 
 
 class Challenge101Boundary(Challenge101Test):
+    """Defines boundary test cases."""
 
     def test_boundary_01(self):
         """One signal: Start, then SIGKILL."""
@@ -35,12 +54,10 @@ class Challenge101Boundary(Challenge101Test):
         # LOCAL VARIABLES
         sig_res_list = []  # List of SignalResults for this test case
         exp_err_list = []  # List of expected stderr output
-        # List of signals to send before SIGKILL
-        signal_list = [num for num in range(20, 31)]
 
         # SETUP INPUT
         # Handled signals
-        for sig_num in signal_list:
+        for sig_num in range(20, 31):
             sig_res_list.append(SignalResults(sig_num, False))
             exp_err_list.append(f'Ignoring signal: {sig_num}')
         # Non-handled signals
@@ -65,6 +82,7 @@ class Challenge101Boundary(Challenge101Test):
 
 
 class Challenge101Special(Challenge101Test):
+    """Defines special test cases."""
 
     def test_special_01(self):
         """Start, SIGSTOP, SIGCONT, then SIGKILL.
@@ -105,7 +123,7 @@ class Challenge101Special(Challenge101Test):
                 self.fail(self._test_error.format(f'Command: {command} produced '
                                                   f'error {std_err}'))
             if 'signal' in std_out:
-                self._add_test_failure(f'signal is essentially deprecated.  See `man 2 signal`')
+                self._add_test_failure('signal is essentially deprecated.  See `man 2 signal`')
             if 'sigaction' not in std_out:
                 self._add_test_failure("You don't seem to be making the right system call yet.")
 
