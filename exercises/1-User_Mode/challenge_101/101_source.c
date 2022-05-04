@@ -45,45 +45,14 @@ int main(void)
 }
 
 
-/*
- * Function: ignore
- * Description: Prints the ignored signal number to stderr
- *
- * signalNo: Incoming signal value
- */
-void ignore(int signalNo, siginfo_t *info, void *context)
-{
-    fprintf(stderr, "Ignoring signal: %d\n", signalNo);
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////// FEEL FREE TO DEFINE YOUR SIGNAL HANDLING FUNCTION HERE //////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 void initSigHandlers(void)
 {
-    // LOCAL VARIABLES
-    int signum = 0;                   // Signam number
-    struct sigaction newAct = { 0 };  // In parameter to sigaction()
-    int errnum = 0;                   // Save errno
-
-    // SETUP
-    newAct.sa_flags = SA_SIGINFO;  // Use newAct.sa_sigaction instead of newAct.sa_handler
-    newAct.sa_sigaction = &ignore;  // Invoke ignore() for each handled signal
-
-    // INIT
-    for (signum = 1; signum < SIGRTMAX + 1; signum++)
-    {
-        // SIGKILL and SIGSTOP can't be "handled" (see: man signal)
-        // 32 and 33 don't exist (see: kill -l)
-        if (signum != SIGKILL && signum != SIGSTOP && signum != 32 && signum != 33)
-        {
-            if (-1 == sigaction(signum, &newAct, NULL))
-            {
-                errnum = errno;
-                fprintf(stderr, "sigaction(%d, sigaction *, NULL) failed with %s (%d)\n",
-                        signum, strerror(errnum), errnum);
-            }
-        }
-    }
-
-    // DONE
-    return;
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// PUT YOUR CODE HERE //////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 }
