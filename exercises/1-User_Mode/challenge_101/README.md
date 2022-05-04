@@ -5,6 +5,15 @@
 Implement a signal handler that catches and ignores all possible signals.  Write the signal
 handler so that it prints "Ignoring signal: X", where X is the signum, to stderr when invoked.
 
+## Details
+
+- Edit `101_source.c` to solve this challenge.
+- Define `initSigHandlers()` to implement your signal handlers.
+- Feel free to define a signal handling function to `101_source.c`.
+- You should not need to change any other code in `101_source.c` (e.g., `main()`).
+- Verify your results (see: "Testing" section below).
+- An example source file and amplifying considerations can be found in the `solution` directory.
+
 ## Testing
 
 ### Manual Testing
