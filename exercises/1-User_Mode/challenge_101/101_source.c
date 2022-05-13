@@ -4,8 +4,9 @@
  * Details:
  *     - Define the contents of initSigHandlers()
  *     - Catch all possible signals
- *     - Print "Ignoring signal: X" to stderr when a signal is caught
+ *     - Print "Ignoring signal" to stderr when a signal is caught
  *     - Feel free to define your "signal handling function" in this source file
+ *     - Ensure your "signal handling function" is async-signal-safe
  */
 
 #include <errno.h>
@@ -26,7 +27,11 @@ void initSigHandlers(void);
 
 int main(void)
 {
-    // Prepare stdout
+    // Local variables
+    char waiting[] = "Waiting for a signal...";  // Waiting message
+    char done[] = "Done\n";                      // Exit message
+
+    // Prepare output
     setvbuf(stdout, NULL, _IONBF, 0);  // Make stdout unbuffered
     setvbuf(stderr, NULL, _IONBF, 0);  // Make stderr unbuffered
 
@@ -34,13 +39,13 @@ int main(void)
     initSigHandlers();
 
     // Wait
-    printf("Waiting for a signal...");
+    write(STDOUT_FILENO, waiting, sizeof(waiting));
     while(1)
     {
         sleep(NAP_TIME);
-        printf(".");
+        write(STDOUT_FILENO, ".", 1);
     }
-    printf("Done\n");
+    write(STDOUT_FILENO, done, sizeof(done));
     return 0;
 }
 
