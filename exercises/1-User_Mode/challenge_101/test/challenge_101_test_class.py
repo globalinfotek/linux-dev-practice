@@ -110,7 +110,7 @@ class Challenge101Test(TediousFuncTest):
         # Look for errant binaries
         try:
             (std_out, _) = execute_subprocess_cmd(cmd_list)
-        except RuntimeError as err:
+        except (RuntimeError, TypeError, ValueError) as err:
             self.fail(self._test_error.format(f'Failed to execute comamnd: {command} with '
                                               f'{str(err)}'))
         else:
@@ -140,6 +140,10 @@ class Challenge101Test(TediousFuncTest):
         self._signal_results = signals
         self._signal_results.append(SignalResults(9, True))
 
+    def expect_ignore(self) -> None:
+        """Verifies ignore message found in stderr."""
+        self.expect_stderr(['Ignoring signal'])
+
     # CLASS HELPER METHODS
     # Methods listed in alphabetical order
     def _build_challenge_bin(self) -> None:
@@ -149,9 +153,28 @@ class Challenge101Test(TediousFuncTest):
 
         # BUILD
         # Clean
-        execute_makefile_rule(makefile, 'clean')
+        self._execute_makefile_rule(makefile, 'clean')
         # Make
-        execute_makefile_rule(makefile, self._challenge_bin)
+        self._execute_makefile_rule(makefile, self._challenge_bin)
+
+    def _execute_makefile_rule(self, makefile: str, rule: str) -> None:
+        """Wraps calls to execute_makefile_rule().
+
+        Wraps calls to hobo.makefile_automation.execute_makefile_rule() to translate exceptions
+        into test case failures.
+
+        Args:
+            makefile_filename: The relative or absolute filename to the Makefile being used.
+            rule: The name of the Makefile rule being verified and executed.
+
+        Raises:
+            None.  Calls self.fail() instead.
+        """
+        try:
+            execute_makefile_rule(makefile, rule)
+        except (FileNotFoundError, OSError, RuntimeError, TypeError, ValueError) as err:
+            self.fail(self._test_error.format(f'Failed to execute {makefile} rule {rule} '
+                                              f'with {str(err)}'))
 
     def _run_test(self) -> None:
         """Override parent's method to execute the test case and test results.
@@ -163,15 +186,20 @@ class Challenge101Test(TediousFuncTest):
         4. Validate results
         """
         # LOCAL VARIABLES
-        popen_obj = None    # Popen object
-        bin_results = None  # BinaryResults
+        popen_obj = None                    # Popen object
+        bin_results = None                  # BinaryResults
+        command = ' '.join(self._cmd_list)  # Human readable command
 
         # EXECUTE
         # Build
         self._build_challenge_bin()
 
         # Start
-        popen_obj = start_subprocess_cmd(self._cmd_list)
+        try:
+            popen_obj = start_subprocess_cmd(self._cmd_list)
+        except (RuntimeError, TypeError, ValueError) as err:
+            self.fail(self._test_error.format(f'Failed to execute comamnd: {command} with '
+                                              f'{str(err)}'))
         sleep(WAIT_TIME)  # Give the binary a second to start
 
         # Signal
