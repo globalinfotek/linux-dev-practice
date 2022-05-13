@@ -4,8 +4,9 @@
  * Details:
  *     - Define the contents of initSigHandlers()
  *     - Catch all possible signals
- *     - Print "Ignoring signal: X" to stderr when a signal is caught
+ *     - Print "Ignoring signal" to stderr when a signal is caught
  *     - Feel free to define your "signal handling function" in this source file
+ *     - Ensure your "signal handling function" is async-signal-safe
  */
 
 #include <errno.h>
@@ -43,7 +44,6 @@ int main(void)
     {
         sleep(NAP_TIME);
         write(STDOUT_FILENO, ".", 1);
-        break;  // DEBUGGING
     }
     write(STDOUT_FILENO, done, sizeof(done));
     return 0;
