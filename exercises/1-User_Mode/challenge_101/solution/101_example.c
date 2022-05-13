@@ -26,7 +26,11 @@ void initSigHandlers(void);
 
 int main(void)
 {
-    // Prepare stdout
+    // Local variables
+    char waiting[] = "Waiting for a signal...";  // Waiting message
+    char done[] = "Done\n";                      // Exit message
+
+    // Prepare output
     setvbuf(stdout, NULL, _IONBF, 0);  // Make stdout unbuffered
     setvbuf(stderr, NULL, _IONBF, 0);  // Make stderr unbuffered
 
@@ -34,13 +38,14 @@ int main(void)
     initSigHandlers();
 
     // Wait
-    printf("Waiting for a signal...");
+    write(STDOUT_FILENO, waiting, sizeof(waiting));
     while(1)
     {
         sleep(NAP_TIME);
-        printf(".");
+        write(STDOUT_FILENO, ".", 1);
+        break;  // DEBUGGING
     }
-    printf("Done\n");
+    write(STDOUT_FILENO, done, sizeof(done));
     return 0;
 }
 
@@ -53,16 +58,17 @@ int main(void)
  */
 void ignore(int signalNo, siginfo_t *info, void *context)
 {
-    fprintf(stderr, "Ignoring signal: %d\n", signalNo);
+    char ignore[] = "Ignoring signal";  // Ignore message
+    write(STDERR_FILENO, ignore, sizeof(ignore));
 }
 
 
 void initSigHandlers(void)
 {
     // LOCAL VARIABLES
-    int signum = 0;                   // Signam number
-    struct sigaction newAct = { 0 };  // In parameter to sigaction()
-    int errnum = 0;                   // Save errno
+    int signum = 0;                         // Signam number
+    struct sigaction newAct = { 0 };        // In parameter to sigaction()
+    char failure[] = "sigaction() failed";  // Failure message
 
     // SETUP
     newAct.sa_flags = SA_SIGINFO;  // Use newAct.sa_sigaction instead of newAct.sa_handler
@@ -77,9 +83,7 @@ void initSigHandlers(void)
         {
             if (-1 == sigaction(signum, &newAct, NULL))
             {
-                errnum = errno;
-                fprintf(stderr, "sigaction(%d, sigaction *, NULL) failed with %s (%d)\n",
-                        signum, strerror(errnum), errnum);
+                write(STDERR_FILENO, failure, sizeof(failure));
             }
         }
     }
