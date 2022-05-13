@@ -33,7 +33,11 @@ kill -SIGSTOP `pidof 101_challenge.bin`  # Binary should exit after "Stopped ./1
 From the challenge directory:
 
 `python3 -m unittest` Execute all challege test cases
+
 `python3 -m unittest -v` Execute all test cases with verbose output
+
 `python3 -m unittest -k normal` Execute all the normal test cases
+
 `python3 -m unittest -k normal_01` Execute normal test case 1
+
 `python3 -m unittest -k normal_01 -v` Execute normal test case 1 with verbose output
