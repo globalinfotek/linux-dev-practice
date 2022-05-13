@@ -1,9 +1,9 @@
-# USER MODE CHALLENGE 001: Signal Handler
+# USER MODE CHALLENGE 01: Signal Handler
 
 ## Description
 
 Implement a signal handler that catches and ignores all possible signals.  Write the signal
-handler so that it prints "Ignoring signal: X", where X is the signum, to stderr when invoked.
+handler so that it prints "Ignoring signal" to stderr when invoked.
 
 ## Details
 
@@ -24,8 +24,8 @@ make clean  # Ensure you build from scratch
 make  # Watch for errors
 ./dist/101_challenge.bin  # Invoke the binary
 # From a different terminal...
-kill -SIGQUIT `pidof 101_challenge.bin`  # Should result in "Ignoring signal: 3" in original terminal
-kill -SIGSTOP `pidof 101_challenge.bin`  # Binary should exit after "Stopped                 ./101.bin" in original terminal
+kill -SIGQUIT `pidof 101_challenge.bin`  # Should result in "Ignoring signal" in original terminal
+kill -SIGSTOP `pidof 101_challenge.bin`  # Binary should exit after "Stopped ./101_challenge.bin" in original terminal
 ```
 
 ### Automated Testing
