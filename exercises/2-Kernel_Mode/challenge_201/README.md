@@ -15,14 +15,36 @@ Write a "Hello Word" Linux Kernel Module (LKM).
 
 ### Manual Testing
 
+#### Compile
+
 ```
 cd exercises/2-Kernel_Mode/challenge_201/  # Manual testing in the local directory is easier
 make clean  # Ensure you build from scratch
 make  # Watch for errors
-... 201_challenge.ko  # _____ the kernel module
-# From a different terminal...
-# TO DO: DON'T DO NOW... verify log messages
-# TO DO: DON'T DO NOW... manual cleanup/LKM unloading
+```
+
+#### Load the Module
+
+```
+# Accomplish these steps from the local exercise directory...
+sudo insmod 201_source.ko  # Insert the module in the Linux kernel
+sudo lsmod | grep 201_source  # Verify your module was loaded
+# Check for your "Loading" message with one (or more) of these commands
+sudo dmesg -k --level=notice  # Print only the "Notice" level kernel messages
+sudo dmesg | grep challenge  # Print any kernel message that contains the phrase "challenge"
+sudo dmesg | tail -n 10  # Show the last 10 entries
+```
+
+#### Remove the Module
+
+```
+# Accomplish these steps from the local exercise directory...
+sudo rmmod 201_source  # Remove your module from the Linux kernel
+sudo lsmod | grep 201_source  # Verify your module is no longer loaded
+# Check for your "Unloading" message with one (or more) of these commands
+sudo dmesg -k --level=notice  # Print only the "Notice" level kernel messages
+sudo dmesg | grep challenge  # Print any kernel message that contains the phrase "challenge"
+sudo dmesg | tail -n 10  # Show the last 10 entries
 ```
 
 ### Automated Testing
