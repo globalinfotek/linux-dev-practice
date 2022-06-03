@@ -22,29 +22,25 @@ class Challenge201Normal(Challenge201Test):
     """Defines normal test cases."""
 
     def test_normal_01(self):
-        """TDB."""
+        """LKM compiles."""
         pass
 
-
-class Challenge201Error(Challenge201Test):
-    """Defines error test cases."""
-
-    def test_error_01(self):
-        """TBD."""
+    def test_normal_02(self):
+        """LKM loads."""
         pass
 
-
-class Challenge201Boundary(Challenge201Test):
-    """Defines boundary test cases."""
-
-    def test_boundary_01(self):
-        """TBD."""
+    def test_normal_03(self):
+        """LKM logs on init."""
         pass
 
+    def test_normal_04(self):
+        """LKM logs on cleanup."""
+        pass
 
-class Challenge201Special(Challenge201Test):
-    """Defines special test cases."""
+    def test_normal_05(self):
+        """Init logged at Notice level."""
+        pass
 
-    def test_special_01(self):
-        """TBD."""
+    def test_normal_06(self):
+        """Cleanup logged at Notic level."""
         pass
