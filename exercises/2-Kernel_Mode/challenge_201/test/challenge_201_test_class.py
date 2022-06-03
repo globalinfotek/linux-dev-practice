@@ -59,7 +59,7 @@ class Challenge201Test(TediousFuncTest):
         """
         self._challenge_path = find_path_to_dir('challenge_201')
         self._full_challenge_bin = os.path.join(self._challenge_path, self._challenge_bin)
-        self.set_command_list([self._full_challenge_bin])  # TO DO: DON'T DO NOW... validate this
+        self.set_command_list(['sudo', 'insmod', self._full_challenge_bin])
         super().setUp()
 
     def tearDown(self) -> None:
@@ -80,7 +80,64 @@ class Challenge201Test(TediousFuncTest):
         # if found, warn the user to rmmod it
 
     # TEST AUTHOR METHODS
-    # Methods listed in "suggested" call order
+    # Methods listed in from "basic" to "in depth" testing fidelity.
+    def build_challenge_bin(self) -> None:
+        """Build the challenge binary.
+
+        1. Builds the binary
+        """
+        self._build_challenge_bin()
+
+    def load_challenge_bin(self) -> None:
+        """Loads the challenge binary.
+
+        1. Builds the binary
+        2. Clears the kernel message log
+        3. Loads the kernel module
+        """
+        # Build
+        self.build_challenge_bin()
+        # Clear
+        self._clear_kernel_log()
+        # Load
+        self._load_kernel_module()
+
+    def check_for_load_msg(self, log_entries: list, level: str = '') -> None:
+        """Loads the binary and verifies log_entries are in the kernel log.
+
+        1. Builds the binary
+        2. Clears the kernel message log
+        3. Loads the kernel module
+        4. Checks the kernel log for log_entries
+
+        Input validation is handled by self._check_kernel_log().
+
+        Args:
+            log_entries: A non-empty list of log_entries, as strings, to verify are in the kernel
+                log.  NOTE: If you felt compelled to call this method with an empty list, just
+                use self.load_challenge_bin() instead.
+            level: Optional; A log level to restrict the entries viewed.  This method will ignore
+                an empty level value.  Supported log levels:
+                    emerg - system is unusable
+                    alert - action must be taken immediately
+                    crit - critical conditions
+                    err - error conditions
+                    warn - warning conditions
+                    notice - normal but significant condition
+                    info - informational
+                    debug - debug-level messages
+
+        Raises:
+            None.  Calls self.fail() or self._add_test_failure(), as appropriate, instead.
+        """
+        # Load
+        self.load_challenge_bin()
+        # Check
+        self.check_for_load_msg(log_entries=log_entries, level=level)
+
+    def present_test_failures(self) -> None:
+        """Present test failures."""
+        self._present_test_failures()
 
     # CLASS HELPER METHODS
     # Methods listed in alphabetical order
@@ -94,6 +151,71 @@ class Challenge201Test(TediousFuncTest):
         self._execute_makefile_rule(makefile, 'clean')
         # Make
         self._execute_makefile_rule(makefile, 'all')
+
+    def _check_kernel_log(self, log_entries: list, level: str = '') -> None:
+        """Verify log_entries can be found in the kernel log.
+
+        Uses dmesg -k to view the kernel messages.  If level is specified, passed to dmesg's
+        --level parameter to restrict the kernel messages by log level.
+
+        Args:
+            log_entries: A non-empty list of strings to ensure are found in the kernel log.
+            level: Optional; A log level to restrict the entries viewed.  This method will ignore
+                an empty level value.  Supported log levels:
+                    emerg - system is unusable
+                    alert - action must be taken immediately
+                    crit - critical conditions
+                    err - error conditions
+                    warn - warning conditions
+                    notice - normal but significant condition
+                    info - informational
+                    debug - debug-level messages
+
+        Raises:
+            None.  Calls self.fail() or self._add_test_failure(), as appropriate, instead.
+        """
+        # LOCAL VARIABLES
+        cmd_list = ['sudo', 'dmesg', '-k']  # Command to execute
+        command = ''                        # Human readable command
+        raw_stdout = ''                     # Stdout from the command
+        raw_stderr = ''                     # Stderr from the command
+        # Supported log levels taken from dmesg --help
+        log_levels = ['emerg', 'alert', 'crit', 'err', 'warn', 'notice', 'info', 'debug']
+
+        # INPUT VALIDATION
+        # log_entries
+        self._validate_list(validate_this=log_entries, param_name='log_entries', can_be_empty=False)
+        for list_entry in log_entries:
+            self._validate_string(list_entry, 'entry in log_entries')
+        # level
+        self._validate_string(level, 'level', can_be_empty=True)
+        if level not in log_levels:
+            self.fail(self._test_error.format(f'{level} is an unsupported log level.  '
+                                              f'Choose from this list instead: {log_levels}'))
+
+        # MASSAGE COMMAND
+        if level:
+            cmd_list.append(f'--level={level}')
+
+        # FETCH ENTRIES
+        (raw_stdout, raw_stderr) = self._execute_subprocess_cmd(cmd_list=cmd_list)
+        if raw_stderr:
+            command = ' '.join(self._cmd_list)
+            self.fail(self._test_error.format(f'Failed to execute {command} with {raw_stderr}'))
+        for log_entry in log_entries:
+            if log_entry not in raw_stdout:
+                self._add_test_failure(f'Unable to locate {log_entry} in {raw_stdout}')
+
+    def _clear_kernel_log(self) -> None:
+        """Clear the kernel ring buffer."""
+        # LOCAL VARIABLES
+        cmd_list = ['sudo', 'dmesg', '--clear']  # Command to clear the buffer
+        command = ' '.join(self._cmd_list)       # Human readable command
+
+        # CLEAR IT
+        (raw_stdout, raw_stderr) = self._execute_subprocess_cmd(cmd_list=cmd_list)
+        if raw_stderr:
+            self.fail(self._test_error.format(f'Failed to execute {command} with {raw_stderr}'))
 
     def _execute_makefile_rule(self, makefile: str, rule: str) -> None:
         """Wraps calls to execute_makefile_rule().
@@ -114,14 +236,64 @@ class Challenge201Test(TediousFuncTest):
             self.fail(self._test_error.format(f'Failed to execute {makefile} rule {rule} '
                                               f'with {str(err)}'))
 
+    def _execute_subprocess_cmd(self, cmd_list: list) -> Tuple[str, str]:
+        """Wraps calls to execute_subprocess_cmd().
+
+        Wraps calls to hobo.subprocess_automation.execute_subprocess_cmd() to translate exceptions
+        into test case failures.
+
+        Args:
+            cmd_list: A list of commands to execute in subprocess, passed in as list_of_cmds.
+
+        Returns:
+            A tuple containing stdout and stderr.
+
+        Raises:
+            None.  Calls self.fail() instead.
+        """
+        # LOCAL VARIABLES
+        command = ''     # Human readable command
+        raw_stdout = ''  # Stdout from command execution
+        raw_stderr = ''  # Stderr from command execution
+
+        # INPUT VALIDATION
+        self._validate_list(validate_this=cmd_list, param_name='cmd_list', can_be_empty=False)
+
+        # EXECUTE IT
+        try:
+            (raw_stdout, raw_stderr) = execute_subprocess_cmd(cmd_list)
+        except (RuntimeError, TypeError, ValueError) as err:
+            command = ' '.join(cmd_list)
+            self.fail(self._test_error.format(f'Failed to execute comamnd: {command} with '
+                                              f'{str(err)}'))
+
+        # DONE
+        return tuple((raw_stdout, raw_stderr))
+
+
+    def _load_kernel_module(self) -> subprocess.Popen:
+        # LOCAL VARIABLES
+        command = ' '.join(self._cmd_list)  # Human readable command
+
+        # LOAD IT
+        try:
+            (self._raw_stdout, self._raw_stderr) = execute_subprocess_cmd(self._cmd_list)
+        except (RuntimeError, TypeError, ValueError) as err:
+            self.fail(self._test_error.format(f'Failed to execute comamnd: {command} with '
+                                              f'{str(err)}'))
+        sleep(WAIT_TIME)  # Give the module a second to load
+        # TO DO: DON'T DO NOW... use a class attribute to indicate A. a kernel module has been
+        #   succesfully loaded and B. it needs to be unloaded in tearDown().
+
     def _run_test(self) -> None:
         """Override parent's method to execute the test case and test results.
 
-        1. Build the binary
-        1. Execute the binary
-        2. Send it signals
-        3. Validate exit
-        4. Validate results
+        1. Build the kernel module
+        2. Clear the kernel messages
+        3. Load the kernel module
+        4. Check the kernel messages
+        5. Unload the kernel module
+        6. Validate results
         """
         # LOCAL VARIABLES
         popen_obj = None                    # Popen object
@@ -132,15 +304,18 @@ class Challenge201Test(TediousFuncTest):
         # Build
         self._build_challenge_bin()
 
-        # Start
+        # Clear
+        # TO DO: DON'T DO NOW... clear the kernel messages
+
+        # Load
         try:
             popen_obj = start_subprocess_cmd(self._cmd_list)
         except (RuntimeError, TypeError, ValueError) as err:
             self.fail(self._test_error.format(f'Failed to execute comamnd: {command} with '
                                               f'{str(err)}'))
-        sleep(WAIT_TIME)  # Give the binary a second to start
+        sleep(WAIT_TIME)  # Give the module a second to load
 
-        # Signal
+        # Check for "Loading"
         bin_results = self._send_signals(popen_obj)
 
         # TEST
