@@ -7,7 +7,7 @@ Write a "Hello Word" Linux Kernel Module (LKM).
 ## Details
 
 - Edit `201_source.c` to solve this challenge.
-- Define ` ` to implement your LKM.
+- Define `init_module()` and `cleanup_module()` to implement your LKM.
 - Verify your results (see: "Testing" section below).
 - An example source file and amplifying considerations can be found in the `solution` directory.
 
