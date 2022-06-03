@@ -57,9 +57,9 @@ class Challenge201Test(TediousFuncTest):
 
         Automate any preparation necessary before each Test Case executes.
         """
-        self.set_command_list([self._full_challenge_bin])  # TO DO: DON'T DO NOW... validate this
         self._challenge_path = find_path_to_dir('challenge_201')
         self._full_challenge_bin = os.path.join(self._challenge_path, self._challenge_bin)
+        self.set_command_list([self._full_challenge_bin])  # TO DO: DON'T DO NOW... validate this
         super().setUp()
 
     def tearDown(self) -> None:
