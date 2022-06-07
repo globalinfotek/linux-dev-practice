@@ -23,24 +23,25 @@ class Challenge201Normal(Challenge201Test):
 
     def test_normal_01(self):
         """LKM compiles."""
-        pass
+        self.build_challenge_bin()
 
     def test_normal_02(self):
         """LKM loads."""
-        pass
+        self.load_challenge_bin()
 
     def test_normal_03(self):
         """LKM logs on init."""
-        pass
+        self.check_for_load_msgs(['challenge_201: Loading'])
 
     def test_normal_04(self):
         """LKM logs on cleanup."""
-        pass
+        self.check_for_unload_msgs(['challenge_201: Loading', 'challenge_201: Unloading'])
 
     def test_normal_05(self):
         """Init logged at Notice level."""
-        pass
+        self.check_for_load_msgs(['challenge_201: Loading'], level='notice')
 
     def test_normal_06(self):
-        """Cleanup logged at Notic level."""
-        pass
+        """Cleanup logged at Notice level."""
+        self.check_for_unload_msgs(['challenge_201: Loading', 'challenge_201: Unloading'],
+                                   level='notice')
