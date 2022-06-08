@@ -10,6 +10,8 @@ Define test cases for Kernel Mode challenge 201: Hello World LKM.
     python3 -m unittest -v -k boundary_01  # The one test cases that should *always* pass
     # -or-
     python3 -m unittest -v -k normal_01    # If you can make this pass, you're doing well
+
+Be sure to run the test cases with elevated privileges.
 """
 
 # Standard Imports

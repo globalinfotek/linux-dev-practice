@@ -31,9 +31,9 @@ WAIT_TIME = 1  # Number of seconds to wait for a binary to respond to a signal
 class Challenge201Test(TediousFuncTest):
     """Functional test framework for Challenge 201.
 
-    By default, each test case should probably follow this call order:
+    By default, each test case should follow this call order:
 
-    Call one, and only one, of the following methods in your test case:
+    1. Call one, and only one, of the following methods in your test case:
         self.build_challenge_bin()
         -or-
         self.load_challenge_bin()
@@ -41,6 +41,8 @@ class Challenge201Test(TediousFuncTest):
         self.check_for_load_msgs()
         -or-
         self.check_for_unload_msgs()
+    2. self.present_test_failures()
+    3. # Done
     """
 
     def __init__(self, *args, **kwargs) -> None:
