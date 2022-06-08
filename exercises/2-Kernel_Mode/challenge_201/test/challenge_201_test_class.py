@@ -33,7 +33,14 @@ class Challenge201Test(TediousFuncTest):
 
     By default, each test case should probably follow this call order:
 
-    TO DO: DON'T DO NOW... determine order of execution
+    Call one, and only one, of the following methods in your test case:
+        self.build_challenge_bin()
+        -or-
+        self.load_challenge_bin()
+        -or-
+        self.check_for_load_msgs()
+        -or-
+        self.check_for_unload_msgs()
     """
 
     def __init__(self, *args, **kwargs) -> None:
@@ -42,6 +49,7 @@ class Challenge201Test(TediousFuncTest):
         self._challenge_path = None                        # Abs path to the challenge directory
         self._full_challenge_bin = None                    # Abs path to the kernel module to test
         self._module_loaded = False                        # Indicates a module needs to be removed
+        self._done = False                                 # Controls test case usage
         super().__init__(*args, **kwargs)
 
     def validate_results(self) -> Any:
@@ -72,11 +80,6 @@ class Challenge201Test(TediousFuncTest):
 
         Verifies there isn't an errant kernel module loaded.  Warns the user if it finds one.
         """
-        # LOCAL VARIABLES
-        std_out = ''                  # stdout
-        cmd_list = ['lsmod']          # Command to execute
-        command = ' '.join(cmd_list)  # Human readable command
-
         # HANDLE ERRANT MODULES
         # Did the test case load a module?
         if self._module_loaded:
@@ -99,9 +102,6 @@ class Challenge201Test(TediousFuncTest):
         """
         self._build_challenge_bin()
 
-        # DONE
-        self._present_test_failures()
-
     def load_challenge_bin(self) -> None:
         """Loads the challenge binary.
 
@@ -115,9 +115,6 @@ class Challenge201Test(TediousFuncTest):
         self._clear_kernel_log()
         # Load
         self._load_kernel_module()
-
-        # DONE
-        self._present_test_failures()
 
     def check_for_load_msgs(self, log_entries: list, level: str = '') -> None:
         """Loads the binary and verifies log_entries are in the kernel log.
@@ -151,9 +148,6 @@ class Challenge201Test(TediousFuncTest):
         self.load_challenge_bin()
         # Check
         self._check_kernel_log(log_entries=log_entries, level=level)
-
-        # DONE
-        self._present_test_failures()
 
     def check_for_unload_msgs(self, log_entries: list, level: str = '') -> None:
         """Loads the binary, removes the binary, and verifies log_entries are in the kernel log.
@@ -191,8 +185,12 @@ class Challenge201Test(TediousFuncTest):
         # Check
         self._check_kernel_log(log_entries=log_entries, level=level)
 
-        # DONE
-        self._present_test_failures()
+    def present_test_failures(self) -> None:
+        """Wraps _present_test_failures() to verify it was called only once."""
+        if self._done:
+            self.fail(self._test_error.format('Test failures have already been presented!'))
+        self._done = True  # *Now* they've been presented
+        self._present_test_failures()  # Present them
 
     # CLASS HELPER METHODS
     # Methods listed in alphabetical order
@@ -286,7 +284,6 @@ class Challenge201Test(TediousFuncTest):
                 (e.g., In the CDE, there's a clockskew.  On bare metal, Make can't find vmlinux.)
                 If True, verify the existence of self._full_challenge_bin before declaring
                 a failure.
-
 
         Raises:
             None.  Calls self.fail() instead.
@@ -394,67 +391,7 @@ class Challenge201Test(TediousFuncTest):
     def _run_test(self) -> None:
         """Override parent's method to execute the test case and test results.
 
-        1. Build the kernel module
-        2. Clear the kernel messages
-        3. Load the kernel module
-        4. Check the kernel messages
-        5. Unload the kernel module
-        6. Validate results
+        Calls self.check_for_unload_msgs() with implicit values.
         """
-        # LOCAL VARIABLES
-        popen_obj = None                    # Popen object
-        bin_results = None                  # BinaryResults
-        command = ' '.join(self._cmd_list)  # Human readable command
-
-        # EXECUTE
-        # Build
-        self._build_challenge_bin()
-
-        # Clear
-        # TO DO: DON'T DO NOW... clear the kernel messages
-
-        # Load
-        try:
-            popen_obj = start_subprocess_cmd(self._cmd_list)
-        except (RuntimeError, TypeError, ValueError) as err:
-            self.fail(self._test_error.format(f'Failed to execute comamnd: {command} with '
-                                              f'{str(err)}'))
-        sleep(WAIT_TIME)  # Give the module a second to load
-
-        # Check for "Loading"
-        bin_results = self._send_signals(popen_obj)
-
-        # TEST
-        # Default
-        self._raw_stdout = bin_results.std_out
-        self._raw_stderr = bin_results.std_err
-        self._validate_default_output(bin_results.std_out, bin_results.std_err,
-                                      bin_results.exit_code)
-
-        # Other results
-        self.validate_results()
-
-    def _validate_default_output(self, std_out: str, std_err: str, exit_code: int) -> None:
-        """Validate output and exit code."""
-        # TEST RESULTS
-        # stdout
-        if self._check_stdout:
-            if self._verify_stdout_empty and std_out:
-                self._add_test_failure(f'Stdout was not empty: {std_out}')
-            else:
-                for entry in self._exp_stdout:
-                    if entry not in std_out:
-                        self._add_test_failure(f'Unable to locate {entry} in stdout')
-        # stderr
-        if self._check_stderr:
-            if self._verify_stderr_empty and std_err:
-                self._add_test_failure(f'Stderr was not empty: {std_err}')
-            else:
-                for entry in self._exp_stderr:
-                    if entry not in std_err:
-                        self._add_test_failure(f'Unable to locate {entry} in stderr')
-        # Exit code
-        if self._check_exit_code:
-            if self._exp_exit_code != exit_code:
-                self._add_test_failure(f'Expected exit code ({self._exp_exit_code}) '
-                                       f'does not match actual exit code ({exit_code})')
+        self.check_for_unload_msgs(['challenge_201: Loading', 'challenge_201: Unloading'],
+                                   level='notice')
