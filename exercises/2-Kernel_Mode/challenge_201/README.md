@@ -60,3 +60,5 @@ From the challenge directory:
 `python3 -m unittest -k normal_01` Execute normal test case 1
 
 `python3 -m unittest -k normal_01 -v` Execute normal test case 1 with verbose output
+
+NOTE: These test cases require elevated privileges.
