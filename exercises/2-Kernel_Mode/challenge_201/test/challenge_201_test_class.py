@@ -12,22 +12,23 @@ Defines test class for Kernel Mode challenge 201: Hello World LKM.
 """
 
 # Standard Imports
-from subprocess import Popen, TimeoutExpired
 from time import sleep
-from typing import Any, NamedTuple, Tuple
+from typing import Any, Tuple
 import os
 # Third Party Imports
 from hobo.disk_operations import find_path_to_dir
 from hobo.makefile_automation import execute_makefile_rule
-from hobo.misc import check_euid
-from hobo.subprocess_wrapper import execute_subprocess_cmd, start_subprocess_cmd
-from hobo.validation import validate_type
+from hobo.subprocess_wrapper import execute_subprocess_cmd
 from tediousstart.tediousfunctest import TediousFuncTest
 
 
 WAIT_TIME = 1  # Number of seconds to wait for a binary to respond to a signal
 
 
+# pylint: disable=too-many-instance-attributes
+# NOTE: Pylint is wrong.  There's only six.  It's counting the reference to attributes in
+#   setUp() as *new* attributes even though they're already initialized in the ctor.  Why not
+#   just move the definition to the ctor?  To avoid raising exceptions in the ctor.
 class Challenge201Test(TediousFuncTest):
     """Functional test framework for Challenge 201.
 
@@ -46,8 +47,8 @@ class Challenge201Test(TediousFuncTest):
     """
 
     def __init__(self, *args, **kwargs) -> None:
-        self._challenge_LKM = '201_source'                 # Name of the Linux Kernel Module
-        self._challenge_bin = self._challenge_LKM + '.ko'  # Name of the binary to test
+        self._challenge_lkm = '201_source'                 # Name of the Linux Kernel Module
+        self._challenge_bin = self._challenge_lkm + '.ko'  # Name of the binary to test
         self._challenge_path = None                        # Abs path to the challenge directory
         self._full_challenge_bin = None                    # Abs path to the kernel module to test
         self._module_loaded = False                        # Indicates a module needs to be removed
@@ -85,10 +86,10 @@ class Challenge201Test(TediousFuncTest):
         if self._module_loaded:
             self._remove_kernel_module()
         # Verify the kernel module is not loaded
-        if self._challenge_LKM in self._get_loaded_kernel_modules():
+        if self._challenge_lkm in self._get_loaded_kernel_modules():
             self.fail(self._test_error.format(f'{self._full_challenge_bin} appears to still be '
                                               'loaded in the kernel.  You may need to '
-                                              f'`rmmod {self._challenge_LKM}`'))
+                                              f'`rmmod {self._challenge_lkm}`'))
 
         # TEAR DOWN
         super().tearDown()
@@ -266,7 +267,7 @@ class Challenge201Test(TediousFuncTest):
         command = ' '.join(self._cmd_list)       # Human readable command
 
         # CLEAR IT
-        (raw_stdout, raw_stderr) = self._execute_subprocess_cmd(cmd_list=cmd_list)
+        (_, raw_stderr) = self._execute_subprocess_cmd(cmd_list=cmd_list)
         if raw_stderr:
             self.fail(self._test_error.format(f'Failed to execute {command} with {raw_stderr}'))
 
@@ -365,9 +366,6 @@ class Challenge201Test(TediousFuncTest):
 
     def _load_kernel_module(self) -> None:
         """Use subprocess to load the test case kernel module."""
-        # LOCAL VARIABLES
-        command = ' '.join(self._cmd_list)  # Human readable command
-
         # LOAD IT
         (self._raw_stdout, self._raw_stderr) = self._execute_subprocess_cmd(self._cmd_list)
         sleep(WAIT_TIME)  # Give the module a second to load
