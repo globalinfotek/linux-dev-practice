@@ -61,4 +61,4 @@ From the challenge directory:
 
 `python3 -m unittest -k normal_01 -v` Execute normal test case 1 with verbose output
 
-NOTE: These test cases require elevated privileges.
+NOTE: These test cases require elevated privileges and may prompt you to authenticate with sudo.
