@@ -70,8 +70,6 @@ class Challenge201Test(TediousFuncTest):
 
         Automate any preparation necessary before each Test Case executes.
         """
-        if not check_euid():
-            self.fail(self._test_error.format('This test case requires elevated privileges'))
         self._challenge_path = find_path_to_dir('challenge_201')
         self._full_challenge_bin = os.path.join(self._challenge_path, self._challenge_bin)
         self.set_command_list(['sudo', 'insmod', self._full_challenge_bin])
