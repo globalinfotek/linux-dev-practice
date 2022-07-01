@@ -15,3 +15,4 @@
     - include: tasks/linux/install-sublime.yml
     - include: tasks/linux/auto-logon.yml
     - include: tasks/linux/tweak-gnome.yml
+    - include: tasks/linux/fix-module-makefile.yml

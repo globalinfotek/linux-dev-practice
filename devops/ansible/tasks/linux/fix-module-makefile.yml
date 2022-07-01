@@ -1,0 +1,61 @@
+# BACKGROUND: This entire task was created to fix one small error in the CDE...
+# A privileged `make clean`
+#
+#
+# Unprivileged `make clean`
+# vagrant@LDP-CDE-v0:~/linux-dev-practice/exercises/2-Kernel_Mode/challenge_201$ make clean
+# make -C /lib/modules/5.4.0-117-generic/build M=/home/vagrant/linux-dev-practice/exercises/2-Kernel_Mode/challenge_201 clean
+# make[1]: Entering directory '/usr/src/linux-headers-5.4.0-117-generic'
+# make[1]: Leaving directory '/usr/src/linux-headers-5.4.0-117-generic'
+#
+# Privileged `sudo make clean`
+# vagrant@LDP-CDE-v0:~/linux-dev-practice/exercises/2-Kernel_Mode/challenge_201$ sudo make clean
+# make -C /lib/modules/5.4.0-117-generic/build M= clean
+# make[1]: Entering directory '/usr/src/linux-headers-5.4.0-117-generic'
+# fs/aufs/Makefile:3: fs/aufs/magic.mk: No such file or directory
+# make[3]: *** No rule to make target 'fs/aufs/magic.mk'.  Stop.
+# make[2]: *** [scripts/Makefile.clean:67: fs/aufs] Error 2
+# make[1]: *** [Makefile:1769: _clean_fs] Error 2
+# make[1]: Leaving directory '/usr/src/linux-headers-5.4.0-117-generic'
+# make: *** [Makefile:7: clean] Error 2
+#
+#
+# CAUSE: The issues with the privileged clean were being caused by:
+#   /lib/modules/5.4.0-117-generic/build/fs/aufs/Makefile
+# Specifically:
+#   include ${src}/magic.mk
+# Why?  Because it can't find:
+#   'fs/aufs/magic.mk' (see above)
+#
+#
+# FIX: Use Ansible to comment out that include!
+
+- name: Get kernel version
+  command: uname -r
+  register: kernel_version
+
+# - name: Before
+#   shell: head /lib/modules/{{kernel_version.stdout}}/build/fs/aufs/Makefile
+#   register: before_output
+
+# - name: Before (debug)
+#   debug: msg={{before_output.stdout}}
+
+- name: Fix module makefile
+  ansible.builtin.replace:
+    path: /lib/modules/{{kernel_version.stdout}}/build/fs/aufs/Makefile
+    regexp: "{{ item.regex }}"
+    replace: "{{ item.replace }}"
+    backup: yes
+  with_items:
+    # PRO TIP: Gotta escape the regex-special characters in the regex statement!
+    - { regex: '^include \$\{src\}/magic.mk', replace: '#include ${src}/magic.mk' }
+  become: yes
+  # become_user: root
+
+# - name: After
+#   shell: head /lib/modules/{{kernel_version.stdout}}/build/fs/aufs/Makefile
+#   register: after_output
+
+# - name: After (debug)
+#   debug: msg={{after_output.stdout}}
