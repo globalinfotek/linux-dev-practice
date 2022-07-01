@@ -1,6 +1,6 @@
 /*
- * Filename: 101_source.c
- * Brief: All exercise code for User Mode challenge 101 goes here.
+ * Filename: 101_example.c
+ * Brief: An example solution for User Mode challenge 101.
  * Details:
  *     - Define the contents of initSigHandlers()
  *     - Catch all possible signals
