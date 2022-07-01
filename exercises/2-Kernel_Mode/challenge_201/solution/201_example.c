@@ -1,6 +1,6 @@
 /*
- * Filename: 201_source.c
- * Brief: All exercise code for Kernel Mode challenge 201 goes here.
+ * Filename: 201_example.c
+ * Brief: An example solution for Kernel Mode challenge 201.
  * Details:
  *     - Write "the simplest kernel module"
  *     - Define init_module() to:
@@ -24,9 +24,10 @@
  */
 int init_module(void)
 {
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////// PUT YOUR CODE HERE //////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // PRINT OPTION 1: printk() messages are printed to the kernel log buffer, which is a ring
+    //  buffer exported to userspace through /dev/kmsg.  printk() messages are printed to the
+    //  kernel log buffer, which is a ring buffer exported to userspace through /dev/kmsg.
+    printk(KERN_NOTICE "%s%s", MODULE_NAME, "Loading\n");
     return 0;  // A non-zero return means init_module failed; module can't be loaded. 
 }
 
@@ -38,9 +39,8 @@ int init_module(void)
  */
 void cleanup_module(void)
 {
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////// PUT YOUR CODE HERE //////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // PRINT OPTION 2: linux/printk.h defines a collection of MACROS to print at certain log levels.
+    pr_notice("%s%s", MODULE_NAME, "Unloading\n");
 }
 
 
